@@ -1,0 +1,54 @@
+<html>
+<head>
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+</head>
+
+<body>
+<h3>WebSocket Go</h3>
+<pre id="output"></pre>
+
+<script>
+    url = 'ws://localhost:12312/ws';
+    c = new WebSocket(url);
+
+    send = function (data) {
+        if (c.readyState ==1 ){
+            $("#output").append((new Date()) + " ==> " + data + "," + c.readyState + "\n")
+        }else if (c.readyState == 3){
+            $("#output").append((new Date()) + " 服務器死了，需要刷新頁面 \n")
+        }else {
+            $("#output").append((new Date()) + " ==> " + c.readyState + "我是未知的，來看看 \n")
+        }
+        c.send(data)
+    }
+    //用于指定当从服务器接受到信息时的回调函数
+    c.onmessage = function (msg) {
+        if (msg.data != "") {
+            $("#output").append((new Date()) + " <== " + msg.data + "\n")
+        }else {
+            $("#output").append((new Date()) + " <== 啥也沒有\n")
+        }
+        console.log(msg)
+    }
+    c.onerror = function(){
+        $("#output").append((new Date()) + " 連接失敗了\n")
+        c.close()
+        return
+    }
+    WebSocket.onclose = function(){
+        $("#output").append((new Date()) + " 連接關閉了\n")
+        c.close()
+        return
+    }
+    //用于指定连接成功后的回调函数
+    c.onopen = function () {
+        setInterval(
+            function () {
+                send("你活著嗎")
+            }
+            , 1000)
+    }
+</script>
+
+</body>
+</html>
